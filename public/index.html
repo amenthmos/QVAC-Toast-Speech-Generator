@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QVAC Toast Speech Generator</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: linear-gradient(160deg, #fff0f5 0%, #ffd9e6 100%);
+    font-family: system-ui, sans-serif; color: #5c1a33; display: flex; justify-content: center; padding: 46px 20px;
+  }
+  .wrap { width: 100%; max-width: 540px; }
+  h1 { font-size: 1.6rem; margin: 0 0 6px; color: #c2185b; font-weight: 800; text-align: center; }
+  .subtitle { color: #8a4a63; margin-bottom: 24px; font-size: 0.9rem; text-align: center; }
+  .card { background: #fff; border-radius: 16px; padding: 28px 26px; box-shadow: 0 8px 24px rgba(194,24,91,0.12); }
+  label { display: block; font-size: 0.85rem; color: #8a4a63; margin-bottom: 6px; font-weight: 600; }
+  input[type=text], textarea {
+    width: 100%; padding: 12px 14px; border-radius: 10px; border: 2px solid #f5b8cf;
+    font-family: inherit; font-size: 1rem; margin-bottom: 16px;
+  }
+  textarea { min-height: 70px; resize: vertical; }
+  button.action {
+    padding: 12px 28px; border: none; border-radius: 999px; font-size: 1rem; font-weight: 700;
+    font-family: inherit; cursor: pointer; background: #c2185b; color: #fff; display: block; margin: 0 auto;
+  }
+  button.action:disabled { opacity: 0.4; cursor: not-allowed; }
+  .status { margin-top: 14px; font-size: 0.85rem; color: #8a4a63; min-height: 1.2em; text-align: center; }
+  .result-box {
+    margin-top: 20px; padding: 18px; background: #fff5f8; border-radius: 12px; border: 1px solid #f5b8cf;
+    font-size: 1rem; line-height: 1.6; color: #5c1a33;
+  }
+  .footer-note { color: #8a4a63; font-size: 0.78rem; margin-top: 20px; text-align: center; }
+  .spinner {
+    display: inline-block; width: 13px; height: 13px; border: 2px solid #f5b8cf;
+    border-top-color: #c2185b; border-radius: 50%; animation: spin 0.8s linear infinite;
+    vertical-align: middle; margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>🥂 Toast Speech Generator</h1>
+    <p class="subtitle">Occasion + relationship + a memory, get a real toast. 100% on-device.</p>
+
+    <div class="card">
+      <label for="occasionInput">Occasion</label>
+      <input type="text" id="occasionInput" placeholder="e.g. wedding, retirement, 50th birthday" />
+      <label for="relationshipInput">Your relationship to the honoree</label>
+      <input type="text" id="relationshipInput" placeholder="e.g. maid of honor, younger brother, work colleague" />
+      <label for="memoriesInput">A memory or fact to include</label>
+      <textarea id="memoriesInput" placeholder="e.g. she once drove 6 hours overnight just to surprise me for my graduation"></textarea>
+      <button class="action" id="generateBtn">Write My Toast</button>
+      <div class="status" id="status"></div>
+      <div id="resultBox"></div>
+    </div>
+
+    <p class="footer-note">Everything runs locally on your machine. No text ever leaves this device.</p>
+  </div>
+
+  <script>
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    const occasionInput = document.getElementById('occasionInput');
+    const relationshipInput = document.getElementById('relationshipInput');
+    const memoriesInput = document.getElementById('memoriesInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const status = document.getElementById('status');
+    const resultBox = document.getElementById('resultBox');
+
+    async function generate() {
+      const occasion = occasionInput.value.trim();
+      const relationship = relationshipInput.value.trim();
+      const memories = memoriesInput.value.trim();
+      if (!occasion || !relationship || !memories) return;
+      generateBtn.disabled = true;
+      resultBox.innerHTML = '';
+      status.innerHTML = '<span class="spinner"></span>Raising a glass...';
+
+      try {
+        const res = await fetch('/api/toast', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ occasion, relationship, memories }),
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        status.textContent = '';
+        resultBox.innerHTML = `<div class="result-box">${escapeHtml(data.toast)}</div>`;
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+      } finally {
+        generateBtn.disabled = false;
+      }
+    }
+
+    generateBtn.addEventListener('click', generate);
+  </script>
+</body>
+</html>

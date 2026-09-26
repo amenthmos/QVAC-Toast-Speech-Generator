@@ -1,0 +1,24 @@
+{
+  "name": "qvac-toast-speech-generator",
+  "version": "1.0.0",
+  "description": "Enter an occasion, your relationship to the honoree, and a memory or two, get a short toast speech that uses those specific details. On-device AI, no cloud call, no API key.",
+  "type": "module",
+  "main": "src/gui.js",
+  "scripts": {
+    "start": "node src/gui.js",
+    "gui": "node src/gui.js"
+  },
+  "keywords": [
+    "qvac",
+    "on-device-ai",
+    "llm",
+    "offline-ai"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@qvac/sdk": "^0.19.0"
+  },
+  "engines": {
+    "node": ">=22.17"
+  }
+}
